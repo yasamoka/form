@@ -6,11 +6,13 @@ import {
   createField,
 } from './createField'
 import { createForm } from './createForm'
-import type { FormApi, FormOptions, Validator } from '@tanstack/form-core'
+import type { FormApi, FormOptions, FormValidator } from '@tanstack/form-core'
 
 export type FormFactory<
   TFormData,
-  TFormValidator extends Validator<TFormData, unknown> | undefined = undefined,
+  TFormValidator extends
+    | FormValidator<TFormData, unknown>
+    | undefined = undefined,
 > = {
   createForm: (
     opts?: () => FormOptions<TFormData, TFormValidator>,
@@ -21,7 +23,9 @@ export type FormFactory<
 
 export function createFormFactory<
   TFormData,
-  TFormValidator extends Validator<TFormData, unknown> | undefined = undefined,
+  TFormValidator extends
+    | FormValidator<TFormData, unknown>
+    | undefined = undefined,
 >(
   defaultOpts?: () => FormOptions<TFormData, TFormValidator>,
 ): FormFactory<TFormData, TFormValidator> {

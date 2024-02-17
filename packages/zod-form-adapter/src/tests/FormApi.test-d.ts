@@ -1,14 +1,14 @@
 import { z } from 'zod'
 import { FieldApi, FormApi } from '@tanstack/form-core'
 import { assertType } from 'vitest'
-import { zodValidator } from '../validator'
+import { zodFormValidator, zodValidator } from '../validator'
 
 it('should allow a Zod validator to be passed in', () => {
   const form = new FormApi({
     defaultValues: {
       name: 'test',
     },
-    validatorAdapter: zodValidator,
+    validatorAdapter: zodFormValidator<{ name: string }>,
   } as const)
 })
 
@@ -17,7 +17,7 @@ it('should allow a Zod validator to handle the correct Zod type', () => {
     defaultValues: {
       name: 'test',
     },
-    validatorAdapter: zodValidator,
+    validatorAdapter: zodFormValidator<{ name: string }>,
   } as const)
 
   const field = new FieldApi({
@@ -34,7 +34,7 @@ it('should allow a Zod validator to handle the correct Zod type on async methods
     defaultValues: {
       name: 'test',
     },
-    validatorAdapter: zodValidator,
+    validatorAdapter: zodFormValidator<{ name: string }>,
   } as const)
 
   const field = new FieldApi({
@@ -51,7 +51,7 @@ it('should allow a functional onChange to be passed when using a validator', () 
     defaultValues: {
       name: 'test',
     },
-    validatorAdapter: zodValidator,
+    validatorAdapter: zodFormValidator<{ name: string }>,
   } as const)
 
   const field = new FieldApi({

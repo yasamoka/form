@@ -2,7 +2,7 @@ import { expect } from 'vitest'
 
 import { FieldApi, FormApi } from '@tanstack/form-core'
 import { z } from 'zod'
-import { zodValidator } from '../validator'
+import { zodFormValidator } from '../validator'
 
 describe('zod form api', () => {
   it('should run an onChange with z.string validation', () => {
@@ -10,7 +10,7 @@ describe('zod form api', () => {
       defaultValues: {
         name: '',
       },
-      validatorAdapter: zodValidator,
+      validatorAdapter: zodFormValidator<{ name: string }>,
     })
 
     const field = new FieldApi({
@@ -37,7 +37,7 @@ describe('zod form api', () => {
       defaultValues: {
         name: '',
       },
-      validatorAdapter: zodValidator,
+      validatorAdapter: zodFormValidator<{ name: string }>,
     })
 
     const field = new FieldApi({

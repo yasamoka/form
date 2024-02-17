@@ -148,7 +148,7 @@ describe('useForm', () => {
         validators: {
           onMount: () => {
             formMounted.value = true
-            return undefined
+            return {}
           },
         },
       })
@@ -179,7 +179,7 @@ describe('useForm', () => {
       const form = formFactory.useForm({
         validators: {
           onChange() {
-            return error
+            return { firstName: [error] }
           },
         },
       })
@@ -228,7 +228,7 @@ describe('useForm', () => {
       const form = formFactory.useForm({
         validators: {
           onChange: ({ value }) =>
-            value.firstName === 'other' ? error : undefined,
+            value.firstName === 'other' ? { firstName: [error] } : {},
         },
       })
 
@@ -277,7 +277,7 @@ describe('useForm', () => {
       const form = formFactory.useForm({
         validators: {
           onChange: ({ value }) =>
-            value.firstName === 'other' ? error : undefined,
+            value.firstName === 'other' ? { firstName: [error] } : {},
         },
       })
 
@@ -329,12 +329,13 @@ describe('useForm', () => {
         },
         validators: {
           onChange: ({ value }) => {
-            if (value.firstName === 'other') return onChangeError
-            return undefined
+            if (value.firstName === 'other')
+              return { firstName: [onChangeError] }
+            return {}
           },
           onBlur: ({ value }) => {
-            if (value.firstName === 'other') return onBlurError
-            return undefined
+            if (value.firstName === 'other') return { firstName: [onBlurError] }
+            return {}
           },
         },
       })
@@ -389,7 +390,7 @@ describe('useForm', () => {
         validators: {
           onChangeAsync: async () => {
             await sleep(10)
-            return error
+            return { firstName: [error] }
           },
         },
       })
@@ -443,11 +444,11 @@ describe('useForm', () => {
         validators: {
           onChangeAsync: async () => {
             await sleep(10)
-            return onChangeError
+            return { firstName: [onChangeError] }
           },
           onBlurAsync: async () => {
             await sleep(10)
-            return onBlurError
+            return { firstName: [onBlurError] }
           },
         },
       })
@@ -507,7 +508,7 @@ describe('useForm', () => {
           onChangeAsync: async () => {
             mockFn()
             await sleep(10)
-            return error
+            return { firstName: [error] }
           },
         },
       })
@@ -533,7 +534,7 @@ describe('useForm', () => {
                     field.handleChange((e.target as HTMLInputElement).value)
                   }
                 />
-                <p>{errors.value.join(',')}</p>
+                <p>{JSON.stringify(errors.value)}</p>
               </div>
             )}
           </form.Field>

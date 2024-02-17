@@ -12,6 +12,7 @@ import { formContext, useFormContext } from './formContext'
 import type {
   DeepKeys,
   DeepValue,
+  FormValidator,
   Narrow,
   Validator,
 } from '@tanstack/form-core'
@@ -27,7 +28,7 @@ declare module '@tanstack/form-core' {
       | Validator<DeepValue<TParentData, TName>, unknown>
       | undefined = undefined,
     TFormValidator extends
-      | Validator<TParentData, unknown>
+      | FormValidator<TParentData, unknown>
       | undefined = undefined,
     TData extends DeepValue<TParentData, TName> = DeepValue<TParentData, TName>,
   > {
@@ -41,7 +42,7 @@ export type CreateField<TParentData> = <
     | Validator<DeepValue<TParentData, TName>, unknown>
     | undefined = undefined,
   TFormValidator extends
-    | Validator<TParentData, unknown>
+    | FormValidator<TParentData, unknown>
     | undefined = undefined,
 >(
   opts: () => { name: Narrow<TName> } & CreateFieldOptions<
@@ -76,7 +77,7 @@ export function createField<
     | Validator<DeepValue<TParentData, TName>, unknown>
     | undefined = undefined,
   TFormValidator extends
-    | Validator<TParentData, unknown>
+    | FormValidator<TParentData, unknown>
     | undefined = undefined,
 >(
   opts: () => CreateFieldOptions<
@@ -126,7 +127,7 @@ type FieldComponentProps<
     | Validator<DeepValue<TParentData, TName>, unknown>
     | undefined = undefined,
   TFormValidator extends
-    | Validator<TParentData, unknown>
+    | FormValidator<TParentData, unknown>
     | undefined = undefined,
   TData extends DeepValue<TParentData, TName> = DeepValue<TParentData, TName>,
 > = {
@@ -156,7 +157,7 @@ type FieldComponentProps<
 export type FieldComponent<
   TParentData,
   TFormValidator extends
-    | Validator<TParentData, unknown>
+    | FormValidator<TParentData, unknown>
     | undefined = undefined,
 > = <
   TName extends DeepKeys<TParentData>,
@@ -182,7 +183,7 @@ export function Field<
     | Validator<DeepValue<TParentData, TName>, unknown>
     | undefined = undefined,
   TFormValidator extends
-    | Validator<TParentData, unknown>
+    | FormValidator<TParentData, unknown>
     | undefined = undefined,
 >(
   props: {

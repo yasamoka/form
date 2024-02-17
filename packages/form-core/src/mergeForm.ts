@@ -1,5 +1,5 @@
 import type { FormApi } from './FormApi'
-import type { Validator } from './types'
+import type { FormValidator } from './types'
 
 export function mutateMergeDeep(target: object, source: object): object {
   const targetKeys = Object.keys(target)
@@ -32,7 +32,9 @@ export function mutateMergeDeep(target: object, source: object): object {
 
 export function mergeForm<
   TFormData,
-  TFormValidator extends Validator<TFormData, unknown> | undefined = undefined,
+  TFormValidator extends
+    | FormValidator<TFormData, unknown>
+    | undefined = undefined,
 >(
   baseForm: FormApi<TFormData, TFormValidator>,
   state: Partial<FormApi<TFormData, TFormValidator>['state']>,

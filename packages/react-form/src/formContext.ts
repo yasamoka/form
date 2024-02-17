@@ -1,8 +1,8 @@
 import { createContext, useContext } from 'rehackt'
-import type { FormApi, Validator } from '@tanstack/form-core'
+import type { FormApi, FormValidator } from '@tanstack/form-core'
 
 export const formContext = createContext<{
-  formApi: FormApi<any, Validator<any, unknown> | undefined>
+  formApi: FormApi<any, FormValidator<any, unknown> | undefined>
   parentFieldName?: string
 } | null>(null!)
 

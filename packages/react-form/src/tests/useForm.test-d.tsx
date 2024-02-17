@@ -28,7 +28,7 @@ it('should type a validator properly', () => {
       validators: {
         onChange({ value }) {
           assertType<84>(value.age)
-          return undefined
+          return {}
         },
       },
     })

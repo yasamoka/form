@@ -2,18 +2,20 @@ import { decode } from 'decode-formdata'
 import type {
   FormApi,
   FormOptions,
-  ValidationError,
-  Validator,
+  FormValidationErrors,
+  FormValidator,
 } from '@tanstack/form-core'
 
 type OnServerValidateFn<TFormData> = (props: {
   value: TFormData
-}) => ValidationError
+}) => FormValidationErrors<TFormData>
 
 type OnServerValidateOrFn<
   TFormData,
-  TFormValidator extends Validator<TFormData, unknown> | undefined = undefined,
-> = TFormValidator extends Validator<TFormData, infer FFN>
+  TFormValidator extends
+    | FormValidator<TFormData, unknown>
+    | undefined = undefined,
+> = TFormValidator extends FormValidator<TFormData, infer FFN>
   ? FFN | OnServerValidateFn<TFormData>
   : OnServerValidateFn<TFormData>
 
@@ -22,7 +24,7 @@ declare module '@tanstack/form-core' {
   interface FormOptions<
     TFormData,
     TFormValidator extends
-      | Validator<TFormData, unknown>
+      | FormValidator<TFormData, unknown>
       | undefined = undefined,
   > {
     onServerValidate?: OnServerValidateOrFn<TFormData, TFormValidator>
@@ -31,7 +33,9 @@ declare module '@tanstack/form-core' {
 
 export type ValidateFormData<
   TFormData,
-  TFormValidator extends Validator<TFormData, unknown> | undefined = undefined,
+  TFormValidator extends
+    | FormValidator<TFormData, unknown>
+    | undefined = undefined,
 > = (
   formData: FormData,
   info?: Parameters<typeof decode>[1],
@@ -39,7 +43,9 @@ export type ValidateFormData<
 
 export const getValidateFormData = <
   TFormData,
-  TFormValidator extends Validator<TFormData, unknown> | undefined = undefined,
+  TFormValidator extends
+    | FormValidator<TFormData, unknown>
+    | undefined = undefined,
 >(
   defaultOpts?: FormOptions<TFormData, TFormValidator>,
 ) =>
@@ -65,6 +71,6 @@ export const getValidateFormData = <
       errorMap: {
         onServer: onServerError,
       },
-      errors: onServerError ? [onServerError] : [],
+      errors: onServerError,
     }
   }) as ValidateFormData<TFormData, TFormValidator>

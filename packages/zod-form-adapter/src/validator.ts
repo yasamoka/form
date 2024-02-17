@@ -1,5 +1,5 @@
 import type { SafeParseError, ZodType, ZodTypeAny } from 'zod'
-import type { ValidationError, Validator } from '@tanstack/form-core'
+import type { FormValidationErrors, ValidationError } from '@tanstack/form-core'
 
 export const zodValidator = () => {
   return {
@@ -25,6 +25,33 @@ export const zodValidator = () => {
           .join(', ')
       }
       return
+    },
+  }
+}
+
+export const zodFormValidator = <TFormData>() => {
+  return {
+    validate(
+      { value }: { value: unknown },
+      fn: ZodType,
+    ): FormValidationErrors<TFormData> {
+      // Call Zod on the value here and return the error message
+      const result = (fn as ZodTypeAny).safeParse(value)
+      if (!result.success) {
+        return result.error.formErrors.fieldErrors
+      }
+      return {}
+    },
+    async validateAsync(
+      { value }: { value: unknown },
+      fn: ZodType,
+    ): Promise<FormValidationErrors<TFormData>> {
+      // Call Zod on the value here and return the error message
+      const result = await (fn as ZodTypeAny).safeParseAsync(value)
+      if (!result.success) {
+        return result.error.formErrors.fieldErrors
+      }
+      return {}
     },
   }
 }

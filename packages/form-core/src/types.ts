@@ -14,3 +14,25 @@ export type ValidationErrorMapKeys = `on${Capitalize<ValidationCause>}`
 export type ValidationErrorMap = {
   [K in ValidationErrorMapKeys]?: ValidationError
 }
+
+declare type allKeys<T> = T extends any ? keyof T : never
+
+export type FormValidationErrors<T> = {
+  [P in allKeys<T>]?: string[]
+}
+
+export type FormValidationErrorMap<T> = {
+  [K in ValidationErrorMapKeys]?: FormValidationErrors<T>
+}
+
+// If/when TypeScript supports higher-kinded types, this should not be `unknown` anymore
+export type FormValidator<TFormData, Fn = unknown> = () => {
+  validate(
+    options: { value: TFormData },
+    fn: Fn,
+  ): FormValidationErrors<TFormData>
+  validateAsync(
+    options: { value: TFormData },
+    fn: Fn,
+  ): Promise<FormValidationErrors<TFormData>>
+}

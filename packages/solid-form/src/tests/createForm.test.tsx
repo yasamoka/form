@@ -5,7 +5,10 @@ import userEvent from '@testing-library/user-event'
 import { Show, createSignal, onCleanup } from 'solid-js'
 import { createForm, createFormFactory } from '../index'
 import { sleep } from './utils'
-import type { ValidationErrorMap } from '@tanstack/form-core'
+import type {
+  FormValidationErrorMap,
+  FormValidationErrors,
+} from '@tanstack/form-core'
 
 const user = userEvent.setup()
 
@@ -129,7 +132,7 @@ describe('createForm', () => {
         validators: {
           onMount: () => {
             setFormMounted(true)
-            return undefined
+            return {}
           },
         },
       }))
@@ -166,7 +169,7 @@ describe('createForm', () => {
       const form = formFactory.createForm(() => ({
         validators: {
           onChange: ({ value }) =>
-            value.firstName.includes('other') ? error : undefined,
+            value.firstName.includes('other') ? { firstName: [error] } : {},
         },
       }))
 
@@ -185,7 +188,7 @@ describe('createForm', () => {
                   onBlur={field().handleBlur}
                   onInput={(e) => field().setValue(e.currentTarget.value)}
                 />
-                <p>{errors().join(',')}</p>
+                <p>{JSON.stringify(errors())}</p>
               </div>
             )}
           />
@@ -212,11 +215,11 @@ describe('createForm', () => {
       const form = formFactory.createForm(() => ({
         validators: {
           onChange: ({ value }) =>
-            value.firstName.includes('other') ? error : undefined,
+            value.firstName.includes('other') ? { firstName: [error] } : {},
         },
       }))
 
-      const [errors, setErrors] = createSignal<ValidationErrorMap>()
+      const [errors, setErrors] = createSignal<FormValidationErrorMap<Person>>()
       onCleanup(form.store.subscribe(() => setErrors(form.state.errorMap)))
 
       return (
@@ -234,7 +237,7 @@ describe('createForm', () => {
                     onBlur={field().handleBlur}
                     onInput={(e) => field().setValue(e.currentTarget.value)}
                   />
-                  <p>{errors()?.onChange}</p>
+                  <p>{JSON.stringify(errors()?.onChange)}</p>
                 </div>
               )
             }}
@@ -264,13 +267,17 @@ describe('createForm', () => {
       const form = formFactory.createForm(() => ({
         validators: {
           onChange: ({ value }) =>
-            value.firstName.includes('other') ? onChangeError : undefined,
+            value.firstName.includes('other')
+              ? { firstName: [onChangeError] }
+              : {},
           onBlur: ({ value }) =>
-            value.firstName.includes('other') ? onBlurError : undefined,
+            value.firstName.includes('other')
+              ? { firstName: [onBlurError] }
+              : {},
         },
       }))
 
-      const [errors, setErrors] = createSignal<ValidationErrorMap>()
+      const [errors, setErrors] = createSignal<FormValidationErrorMap<Person>>()
       onCleanup(form.store.subscribe(() => setErrors(form.state.errorMap)))
 
       return (
@@ -287,8 +294,8 @@ describe('createForm', () => {
                   onBlur={field().handleBlur}
                   onInput={(e) => field().handleChange(e.currentTarget.value)}
                 />
-                <p>{errors()?.onChange}</p>
-                <p>{errors()?.onBlur}</p>
+                <p>{JSON.stringify(errors()?.onChange)}</p>
+                <p>{JSON.stringify(errors()?.onBlur)}</p>
               </div>
             )}
           />
@@ -320,12 +327,12 @@ describe('createForm', () => {
         validators: {
           onChangeAsync: async () => {
             await sleep(10)
-            return error
+            return { firstName: [error] }
           },
         },
       }))
 
-      const [errors, setErrors] = createSignal<ValidationErrorMap>()
+      const [errors, setErrors] = createSignal<FormValidationErrorMap<Person>>()
       onCleanup(form.store.subscribe(() => setErrors(form.state.errorMap)))
 
       return (
@@ -342,7 +349,7 @@ describe('createForm', () => {
                   onBlur={field().handleBlur}
                   onInput={(e) => field().handleChange(e.currentTarget.value)}
                 />
-                <p>{errors()?.onChange}</p>
+                <p>{JSON.stringify(errors()?.onChange)}</p>
               </div>
             )}
           />
@@ -373,16 +380,16 @@ describe('createForm', () => {
         validators: {
           async onChangeAsync() {
             await sleep(10)
-            return onChangeError
+            return { firstName: [onChangeError] }
           },
           async onBlurAsync() {
             await sleep(10)
-            return onBlurError
+            return { firstName: [onBlurError] }
           },
         },
       }))
 
-      const [errors, setErrors] = createSignal<ValidationErrorMap>()
+      const [errors, setErrors] = createSignal<FormValidationErrorMap<Person>>()
       onCleanup(form.store.subscribe(() => setErrors(form.state.errorMap)))
 
       return (
@@ -399,8 +406,8 @@ describe('createForm', () => {
                   onBlur={field().handleBlur}
                   onInput={(e) => field().handleChange(e.currentTarget.value)}
                 />
-                <p>{errors()?.onChange}</p>
-                <p>{errors()?.onBlur}</p>
+                <p>{JSON.stringify(errors()?.onChange)}</p>
+                <p>{JSON.stringify(errors()?.onBlur)}</p>
               </div>
             )}
           />
@@ -437,15 +444,17 @@ describe('createForm', () => {
           onChangeAsync: async () => {
             mockFn()
             await sleep(10)
-            return error
+            return { firstName: [error] }
           },
         },
       }))
 
-      const [errors, setErrors] = createSignal<string>()
+      const [errors, setErrors] = createSignal<
+        FormValidationErrors<Person> | undefined
+      >()
       onCleanup(
         form.store.subscribe(() =>
-          setErrors(form.state.errorMap.onChange || ''),
+          setErrors(form.state.errorMap.onChange || {}),
         ),
       )
 
@@ -463,7 +472,7 @@ describe('createForm', () => {
                   onBlur={field().handleBlur}
                   onInput={(e) => field().handleChange(e.currentTarget.value)}
                 />
-                <p>{errors()}</p>
+                <p>{JSON.stringify(errors())}</p>
               </div>
             )}
           />

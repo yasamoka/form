@@ -9,7 +9,7 @@ import {
 } from './createField'
 import { formContext } from './formContext'
 import type { JSXElement } from 'solid-js'
-import type { FormOptions, FormState, Validator } from '@tanstack/form-core'
+import type { FormOptions, FormState, FormValidator } from '@tanstack/form-core'
 
 type NoInfer<T> = [T][T extends any ? 0 : never]
 
@@ -32,7 +32,7 @@ declare module '@tanstack/form-core' {
 export function createForm<
   TParentData,
   TFormValidator extends
-    | Validator<TParentData, unknown>
+    | FormValidator<TParentData, unknown>
     | undefined = undefined,
 >(
   opts?: () => FormOptions<TParentData, TFormValidator>,

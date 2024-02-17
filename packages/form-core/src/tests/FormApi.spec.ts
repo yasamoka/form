@@ -17,7 +17,7 @@ describe('form api', () => {
       isFormValid: true,
       isFormValidating: false,
       isSubmitted: false,
-      errors: [],
+      errors: {},
       errorMap: {},
       isSubmitting: false,
       isTouched: false,
@@ -47,7 +47,7 @@ describe('form api', () => {
       fieldMeta: {},
       canSubmit: true,
       isFieldsValid: true,
-      errors: [],
+      errors: {},
       errorMap: {},
       isFieldsValidating: false,
       isFormValid: true,
@@ -77,7 +77,7 @@ describe('form api', () => {
     expect(form.state).toEqual({
       values: {},
       fieldMeta: {},
-      errors: [],
+      errors: {},
       errorMap: {},
       canSubmit: true,
       isFieldsValid: true,
@@ -119,7 +119,7 @@ describe('form api', () => {
       values: {
         name: 'other',
       },
-      errors: [],
+      errors: {},
       errorMap: {},
       fieldMeta: {},
       canSubmit: true,
@@ -159,7 +159,7 @@ describe('form api', () => {
       values: {
         name: 'test',
       },
-      errors: [],
+      errors: {},
       errorMap: {},
       fieldMeta: {},
       canSubmit: true,
@@ -420,8 +420,9 @@ describe('form api', () => {
       },
       validators: {
         onChange: ({ value }) => {
-          if (value.name === 'other') return 'Please enter a different value'
-          return
+          if (value.name === 'other')
+            return { name: ['Please enter a different value'] }
+          return {}
         },
       },
     })
@@ -433,7 +434,11 @@ describe('form api', () => {
     form.mount()
     field.mount()
 
-    expect(form.state.errors.length).toBe(0)
+    expect(
+      Object.values(form.state.errors).some(
+        (fieldErrors) => fieldErrors.length > 0,
+      ),
+    ).toBe(false)
     field.setValue('other', { touch: true })
     expect(form.state.errors).toContain('Please enter a different value')
     expect(form.state.errorMap).toMatchObject({
@@ -451,8 +456,9 @@ describe('form api', () => {
       validators: {
         onChangeAsync: async ({ value }) => {
           await sleep(1000)
-          if (value.name === 'other') return 'Please enter a different value'
-          return
+          if (value.name === 'other')
+            return { name: ['Please enter a different value'] }
+          return {}
         },
       },
     })
@@ -464,7 +470,11 @@ describe('form api', () => {
 
     field.mount()
 
-    expect(form.state.errors.length).toBe(0)
+    expect(
+      Object.values(form.state.errors).some(
+        (fieldErrors) => fieldErrors.length > 0,
+      ),
+    ).toBe(false)
     field.setValue('other', { touch: true })
     await vi.runAllTimersAsync()
     expect(form.state.errors).toContain('Please enter a different value')
@@ -485,8 +495,9 @@ describe('form api', () => {
         onChangeAsyncDebounceMs: 1000,
         onChangeAsync: async ({ value }) => {
           await sleepMock(1000)
-          if (value.name === 'other') return 'Please enter a different value'
-          return
+          if (value.name === 'other')
+            return { name: ['Please enter a different value'] }
+          return {}
         },
       },
     })
@@ -498,7 +509,11 @@ describe('form api', () => {
 
     field.mount()
 
-    expect(form.state.errors.length).toBe(0)
+    expect(
+      Object.values(form.state.errors).some(
+        (fieldErrors) => fieldErrors.length > 0,
+      ),
+    ).toBe(false)
     field.setValue('other', { touch: true })
     field.setValue('other')
     await vi.runAllTimersAsync()
@@ -522,8 +537,9 @@ describe('form api', () => {
       validators: {
         onChangeAsync: async ({ value }) => {
           await sleepMock(1000)
-          if (value.name === 'other') return 'Please enter a different value'
-          return
+          if (value.name === 'other')
+            return { name: ['Please enter a different value'] }
+          return {}
         },
       },
     })
@@ -535,7 +551,11 @@ describe('form api', () => {
     form.mount()
     field.mount()
 
-    expect(form.state.errors.length).toBe(0)
+    expect(
+      Object.values(form.state.errors).some(
+        (fieldErrors) => fieldErrors.length > 0,
+      ),
+    ).toBe(false)
     field.setValue('other', { touch: true })
     field.setValue('other')
     await vi.runAllTimersAsync()
@@ -554,8 +574,9 @@ describe('form api', () => {
       },
       validators: {
         onBlur: ({ value }) => {
-          if (value.name === 'other') return 'Please enter a different value'
-          return
+          if (value.name === 'other')
+            return { name: ['Please enter a different value'] }
+          return {}
         },
       },
     })
@@ -585,8 +606,9 @@ describe('form api', () => {
       validators: {
         onBlurAsync: async ({ value }) => {
           await sleep(1000)
-          if (value.name === 'other') return 'Please enter a different value'
-          return
+          if (value.name === 'other')
+            return { name: ['Please enter a different value'] }
+          return {}
         },
       },
     })
@@ -597,7 +619,11 @@ describe('form api', () => {
 
     form.mount()
     field.mount()
-    expect(form.state.errors.length).toBe(0)
+    expect(
+      Object.values(form.state.errors).some(
+        (fieldErrors) => fieldErrors.length > 0,
+      ),
+    ).toBe(false)
     field.setValue('other', { touch: true })
     field.validate('blur')
     await vi.runAllTimersAsync()
@@ -619,8 +645,9 @@ describe('form api', () => {
         onBlurAsyncDebounceMs: 1000,
         onBlurAsync: async ({ value }) => {
           await sleepMock(10)
-          if (value.name === 'other') return 'Please enter a different value'
-          return
+          if (value.name === 'other')
+            return { name: ['Please enter a different value'] }
+          return {}
         },
       },
     })
@@ -632,7 +659,11 @@ describe('form api', () => {
     form.mount()
     field.mount()
 
-    expect(form.state.errors.length).toBe(0)
+    expect(
+      Object.values(form.state.errors).some(
+        (fieldErrors) => fieldErrors.length > 0,
+      ),
+    ).toBe(false)
     field.setValue('other', { touch: true })
     field.validate('blur')
     field.validate('blur')
@@ -657,8 +688,9 @@ describe('form api', () => {
       validators: {
         onBlurAsync: async ({ value }) => {
           await sleepMock(10)
-          if (value.name === 'other') return 'Please enter a different value'
-          return
+          if (value.name === 'other')
+            return { name: ['Please enter a different value'] }
+          return {}
         },
       },
     })
@@ -670,7 +702,11 @@ describe('form api', () => {
     form.mount()
     field.mount()
 
-    expect(form.state.errors.length).toBe(0)
+    expect(
+      Object.values(form.state.errors).some(
+        (fieldErrors) => fieldErrors.length > 0,
+      ),
+    ).toBe(false)
     field.setValue('other', { touch: true })
     field.validate('blur')
     field.validate('blur')
@@ -690,12 +726,14 @@ describe('form api', () => {
       },
       validators: {
         onBlur: ({ value }) => {
-          if (value.name === 'other') return 'Please enter a different value'
-          return
+          if (value.name === 'other')
+            return { name: ['Please enter a different value'] }
+          return {}
         },
         onChange: ({ value }) => {
-          if (value.name === 'other') return 'Please enter a different value'
-          return
+          if (value.name === 'other')
+            return { name: ['Please enter a different value'] }
+          return {}
         },
       },
     })
@@ -726,8 +764,9 @@ describe('form api', () => {
       },
       validators: {
         onChange: ({ value }) => {
-          if (value.name === 'other') return 'Please enter a different value'
-          return
+          if (value.name === 'other')
+            return { name: ['Please enter a different value'] }
+          return {}
         },
       },
     })
@@ -756,8 +795,9 @@ describe('form api', () => {
       },
       validators: {
         onMount: ({ value }) => {
-          if (value.name === 'other') return 'Please enter a different value'
-          return
+          if (value.name === 'other')
+            return { name: ['Please enter a different value'] }
+          return {}
         },
       },
     })
@@ -912,7 +952,9 @@ describe('form api', () => {
       },
       validators: {
         onSubmit: ({ value }) =>
-          value.firstName.length > 0 ? undefined : 'first name is required',
+          value.firstName.length > 0
+            ? {}
+            : { firstName: ['first name is required'] },
       },
     })
 
@@ -924,7 +966,9 @@ describe('form api', () => {
     field.mount()
 
     await form.handleSubmit()
-    expect(form.state.errors).toStrictEqual(['first name is required'])
+    expect(form.state.errors).toStrictEqual({
+      firstName: ['first name is required'],
+    })
   })
 
   it('should run onChange validation during submit', async () => {
@@ -934,7 +978,9 @@ describe('form api', () => {
       },
       validators: {
         onChange: ({ value }) =>
-          value.firstName.length > 0 ? undefined : 'first name is required',
+          value.firstName.length > 0
+            ? {}
+            : { firstName: ['first name is required'] },
       },
     })
 
@@ -946,6 +992,8 @@ describe('form api', () => {
     field.mount()
 
     await form.handleSubmit()
-    expect(form.state.errors).toStrictEqual(['first name is required'])
+    expect(form.state.errors).toStrictEqual({
+      firstName: ['first name is required'],
+    })
   })
 })

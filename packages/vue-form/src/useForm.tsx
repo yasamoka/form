@@ -3,7 +3,12 @@ import { useStore } from '@tanstack/vue-store'
 import { defineComponent, onMounted } from 'vue'
 import { Field, useField } from './useField'
 import { provideFormContext } from './formContext'
-import type { FormOptions, FormState, Validator } from '@tanstack/form-core'
+import type {
+  FormOptions,
+  FormState,
+  FormValidator,
+  Validator,
+} from '@tanstack/form-core'
 import type { NoInfer } from '@tanstack/vue-store'
 import type { EmitsOptions, Ref, SetupContext, SlotsType } from 'vue'
 import type { FieldComponent, UseField } from './useField'
@@ -32,7 +37,9 @@ declare module '@tanstack/form-core' {
 
 export function useForm<
   TFormData,
-  TFormValidator extends Validator<TFormData, unknown> | undefined = undefined,
+  TFormValidator extends
+    | FormValidator<TFormData, unknown>
+    | undefined = undefined,
 >(
   opts?: FormOptions<TFormData, TFormValidator>,
 ): FormApi<TFormData, TFormValidator> {

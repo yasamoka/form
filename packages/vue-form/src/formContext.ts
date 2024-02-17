@@ -1,9 +1,11 @@
 import { inject, provide } from 'vue'
-import type { FormApi, Validator } from '@tanstack/form-core'
+import type { FormApi, FormValidator } from '@tanstack/form-core'
 
 export type FormContext<
   TFormData = any,
-  TFormValidator extends Validator<TFormData, unknown> | undefined = undefined,
+  TFormValidator extends
+    | FormValidator<TFormData, unknown>
+    | undefined = undefined,
 > = {
   formApi: FormApi<TFormData, TFormValidator>
   parentFieldName?: string
@@ -13,7 +15,9 @@ export const formContext = Symbol('FormContext')
 
 export function provideFormContext<
   TFormData = any,
-  TFormValidator extends Validator<TFormData, unknown> | undefined = undefined,
+  TFormValidator extends
+    | FormValidator<TFormData, unknown>
+    | undefined = undefined,
 >(val: FormContext<TFormData, TFormValidator>) {
   provide(formContext, val)
 }
