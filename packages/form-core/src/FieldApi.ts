@@ -2,6 +2,9 @@ import { Store } from '@tanstack/store'
 import { getAsyncValidatorArray, getSyncValidatorArray } from './utils'
 import type { FormApi } from './FormApi'
 import type {
+  FormValidationErrorMap,
+  FormValidationErrors,
+  FormValidator,
   ValidationCause,
   ValidationError,
   ValidationErrorMap,
@@ -16,7 +19,7 @@ export type FieldValidateFn<
     | Validator<DeepValue<TParentData, TName>, unknown>
     | undefined = undefined,
   TFormValidator extends
-    | Validator<TParentData, unknown>
+    | FormValidator<TParentData, unknown>
     | undefined = undefined,
   TData extends DeepValue<TParentData, TName> = DeepValue<TParentData, TName>,
 > = (props: {
@@ -31,7 +34,7 @@ export type FieldValidateOrFn<
     | Validator<DeepValue<TParentData, TName>, unknown>
     | undefined = undefined,
   TFormValidator extends
-    | Validator<TParentData, unknown>
+    | FormValidator<TParentData, unknown>
     | undefined = undefined,
   TData extends DeepValue<TParentData, TName> = DeepValue<TParentData, TName>,
 > = TFieldValidator extends Validator<TData, infer TFN>
@@ -44,7 +47,7 @@ export type FieldValidateOrFn<
           TFormValidator,
           TData
         >
-  : TFormValidator extends Validator<TParentData, infer FFN>
+  : TFormValidator extends FormValidator<TParentData, infer FFN>
     ?
         | FFN
         | FieldValidateFn<
@@ -69,7 +72,7 @@ export type FieldValidateAsyncFn<
     | Validator<DeepValue<TParentData, TName>, unknown>
     | undefined = undefined,
   TFormValidator extends
-    | Validator<TParentData, unknown>
+    | FormValidator<TParentData, unknown>
     | undefined = undefined,
   TData extends DeepValue<TParentData, TName> = DeepValue<TParentData, TName>,
 > = (options: {
@@ -85,7 +88,7 @@ export type FieldAsyncValidateOrFn<
     | Validator<DeepValue<TParentData, TName>, unknown>
     | undefined = undefined,
   TFormValidator extends
-    | Validator<TParentData, unknown>
+    | FormValidator<TParentData, unknown>
     | undefined = undefined,
   TData extends DeepValue<TParentData, TName> = DeepValue<TParentData, TName>,
 > = TFieldValidator extends Validator<TData, infer TFN>
@@ -98,7 +101,7 @@ export type FieldAsyncValidateOrFn<
           TFormValidator,
           TData
         >
-  : TFormValidator extends Validator<TParentData, infer FFN>
+  : TFormValidator extends FormValidator<TParentData, infer FFN>
     ?
         | FFN
         | FieldValidateAsyncFn<
@@ -123,7 +126,7 @@ export interface FieldValidators<
     | Validator<DeepValue<TParentData, TName>, unknown>
     | undefined = undefined,
   TFormValidator extends
-    | Validator<TParentData, unknown>
+    | FormValidator<TParentData, unknown>
     | undefined = undefined,
   TData extends DeepValue<TParentData, TName> = DeepValue<TParentData, TName>,
 > {
@@ -188,7 +191,7 @@ export interface FieldOptions<
     | Validator<DeepValue<TParentData, TName>, unknown>
     | undefined = undefined,
   TFormValidator extends
-    | Validator<TParentData, unknown>
+    | FormValidator<TParentData, unknown>
     | undefined = undefined,
   TData extends DeepValue<TParentData, TName> = DeepValue<TParentData, TName>,
 > {
@@ -216,7 +219,7 @@ export interface FieldApiOptions<
     | Validator<DeepValue<TParentData, TName>, unknown>
     | undefined = undefined,
   TFormValidator extends
-    | Validator<TParentData, unknown>
+    | FormValidator<TParentData, unknown>
     | undefined = undefined,
   TData extends DeepValue<TParentData, TName> = DeepValue<TParentData, TName>,
 > extends FieldOptions<
@@ -255,7 +258,7 @@ export class FieldApi<
     | Validator<DeepValue<TParentData, TName>, unknown>
     | undefined = undefined,
   TFormValidator extends
-    | Validator<TParentData, unknown>
+    | FormValidator<TParentData, unknown>
     | undefined = undefined,
   TData extends DeepValue<TParentData, TName> = DeepValue<TParentData, TName>,
 > {
@@ -493,7 +496,7 @@ export class FieldApi<
     TData,
     TSubName,
     Validator<TSubData, unknown> | undefined,
-    Validator<TData, unknown> | undefined,
+    FormValidator<TData, unknown> | undefined,
     TSubData
   > =>
     new FieldApi({

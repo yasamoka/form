@@ -11,6 +11,9 @@ import {
 import type { DeepKeys, DeepValue, Updater } from './utils'
 import type { FieldApi, FieldMeta } from './FieldApi'
 import type {
+  FormValidationErrorMap,
+  FormValidationErrors,
+  FormValidator,
   ValidationCause,
   ValidationError,
   ValidationErrorMap,
@@ -20,7 +23,9 @@ import type {
 
 export type FormValidateFn<
   TFormData,
-  TFormValidator extends Validator<TFormData, unknown> | undefined = undefined,
+  TFormValidator extends
+    | FormValidator<TFormData, unknown>
+    | undefined = undefined,
 > = (props: {
   value: TFormData
   formApi: FormApi<TFormData, TFormValidator>
@@ -28,14 +33,18 @@ export type FormValidateFn<
 
 export type FormValidateOrFn<
   TFormData,
-  TFormValidator extends Validator<TFormData, unknown> | undefined = undefined,
-> = TFormValidator extends Validator<TFormData, infer TFN>
+  TFormValidator extends
+    | FormValidator<TFormData, unknown>
+    | undefined = undefined,
+> = TFormValidator extends FormValidator<TFormData, infer TFN>
   ? TFN
   : FormValidateFn<TFormData, TFormValidator>
 
 export type FormValidateAsyncFn<
   TFormData,
-  TFormValidator extends Validator<TFormData, unknown> | undefined = undefined,
+  TFormValidator extends
+    | FormValidator<TFormData, unknown>
+    | undefined = undefined,
 > = (props: {
   value: TFormData
   formApi: FormApi<TFormData, TFormValidator>
@@ -44,14 +53,18 @@ export type FormValidateAsyncFn<
 
 export type FormAsyncValidateOrFn<
   TFormData,
-  TFormValidator extends Validator<TFormData, unknown> | undefined = undefined,
-> = TFormValidator extends Validator<TFormData, infer FFN>
+  TFormValidator extends
+    | FormValidator<TFormData, unknown>
+    | undefined = undefined,
+> = TFormValidator extends FormValidator<TFormData, infer FFN>
   ? FFN | FormValidateAsyncFn<TFormData, TFormValidator>
   : FormValidateAsyncFn<TFormData, TFormValidator>
 
 export interface FormValidators<
   TFormData,
-  TFormValidator extends Validator<TFormData, unknown> | undefined = undefined,
+  TFormValidator extends
+    | FormValidator<TFormData, unknown>
+    | undefined = undefined,
 > {
   onMount?: FormValidateOrFn<TFormData, TFormValidator>
   onChange?: FormValidateOrFn<TFormData, TFormValidator>
@@ -67,7 +80,9 @@ export interface FormValidators<
 
 export interface FormTransform<
   TFormData,
-  TFormValidator extends Validator<TFormData, unknown> | undefined = undefined,
+  TFormValidator extends
+    | FormValidator<TFormData, unknown>
+    | undefined = undefined,
 > {
   fn: (
     formBase: FormApi<TFormData, TFormValidator>,
@@ -77,7 +92,9 @@ export interface FormTransform<
 
 export interface FormOptions<
   TFormData,
-  TFormValidator extends Validator<TFormData, unknown> | undefined = undefined,
+  TFormValidator extends
+    | FormValidator<TFormData, unknown>
+    | undefined = undefined,
 > {
   defaultValues?: TFormData
   defaultState?: Partial<FormState<TFormData>>
@@ -102,7 +119,9 @@ export type ValidationMeta = {
 
 export type FieldInfo<
   TFormData,
-  TFormValidator extends Validator<TFormData, unknown> | undefined = undefined,
+  TFormValidator extends
+    | FormValidator<TFormData, unknown>
+    | undefined = undefined,
 > = {
   instances: Record<
     string,
@@ -169,7 +188,9 @@ function getDefaultFormState<TFormData>(
 
 export class FormApi<
   TFormData,
-  TFormValidator extends Validator<TFormData, unknown> | undefined = undefined,
+  TFormValidator extends
+    | FormValidator<TFormData, unknown>
+    | undefined = undefined,
 > {
   options: FormOptions<TFormData, TFormValidator> = {}
   store!: Store<FormState<TFormData>>
