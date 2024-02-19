@@ -8,7 +8,7 @@ const config = defineConfig({
     watch: false,
     environment: 'jsdom',
     globals: true,
-    coverage: { enabled: true, provider: 'istanbul', include: ['src/**/*'] },
+    coverage: { enabled: false, provider: 'istanbul', include: ['src/**/*'] },
     typecheck: { enabled: true },
   },
 })

@@ -603,13 +603,14 @@ export class FormApi<
     updater: Updater<FieldMeta>,
   ) => {
     this.store.setState((prev) => {
-      return {
+      const state = {
         ...prev,
         fieldMeta: {
           ...prev.fieldMeta,
           [field]: functionalUpdate(updater, prev.fieldMeta[field]),
         },
       }
+      return state
     })
   }
 
