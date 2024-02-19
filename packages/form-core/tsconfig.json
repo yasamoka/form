@@ -2,7 +2,8 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "moduleResolution": "Bundler",
-    "types": ["vitest/globals"]
+    "types": ["vitest/globals"],
+    "sourceMap": true
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", ".eslintrc.cjs", "vite.config.ts"]
 }

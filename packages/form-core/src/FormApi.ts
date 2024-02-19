@@ -140,8 +140,8 @@ export type FormState<TFormData> = {
   // Form Validation
   isFormValidating: boolean
   isFormValid: boolean
-  errors: ValidationError[]
-  errorMap: ValidationErrorMap
+  errors: FormValidationErrors<TFormData>
+  errorMap: FormValidationErrorMap<TFormData>
   validationMetaMap: Record<ValidationErrorMapKeys, ValidationMeta | undefined>
   // Fields
   fieldMeta: Record<DeepKeys<TFormData>, FieldMeta>
@@ -162,7 +162,7 @@ function getDefaultFormState<TFormData>(
 ): FormState<TFormData> {
   return {
     values: defaultState.values ?? ({} as never),
-    errors: defaultState.errors ?? [],
+    errors: defaultState.errors ?? {},
     errorMap: defaultState.errorMap ?? {},
     fieldMeta: defaultState.fieldMeta ?? ({} as never),
     canSubmit: defaultState.canSubmit ?? true,
@@ -232,10 +232,28 @@ export class FormApi<
           const isTouched = fieldMetaValues.some((field) => field?.isTouched)
 
           const isValidating = isFieldsValidating || state.isFormValidating
-          state.errors = Object.values(state.errorMap).filter(
-            (val: unknown) => val !== undefined,
+          // state.errors = Object.values(state.errorMap).filter(
+          //   (val: unknown) => val !== undefined,
+          // )
+          // const isFormValid = state.errors.length === 0
+          state.errors = {}
+          Object.values(state.errorMap).forEach((formErrors) => {
+            let key: keyof typeof formErrors
+            for (key in formErrors) {
+              const fieldErrors = state.errors[key]
+              if (fieldErrors !== undefined) {
+                formErrors[key]?.forEach((fieldError) =>
+                  fieldErrors.push(fieldError),
+                )
+              }
+            }
+          })
+          const isFormValid = Object.values(
+            state.errors as FormValidationErrors<any>, // why did we need to do this?
+          ).every(
+            (fieldErrors) =>
+              fieldErrors === undefined || fieldErrors.length === 0,
           )
-          const isFormValid = state.errors.length === 0
           const isValid = isFieldsValid && isFormValid
           const canSubmit =
             (state.submissionAttempts === 0 && !isTouched) ||
@@ -284,7 +302,7 @@ export class FormApi<
       : FormAsyncValidateOrFn<TFormData, TFormValidator>
     value: TValue
     type: TType
-  }): ReturnType<ReturnType<Validator<any>>[TType]> {
+  }): ReturnType<ReturnType<FormValidator<any>>[TType]> {
     const adapter = this.options.validatorAdapter
     if (adapter && typeof props.validate !== 'function') {
       return adapter()[props.type](props.value, props.validate) as never
@@ -304,7 +322,12 @@ export class FormApi<
       },
       type: 'validate',
     })
-    if (error) {
+    // if (error) {
+    if (
+      Object.values(error).some(
+        (fieldErrors) => fieldErrors !== undefined && fieldErrors.length > 0,
+      )
+    ) {
       this.store.setState((prev) => ({
         ...prev,
         errorMap: { ...prev.errorMap, onMount: error },
@@ -388,16 +411,24 @@ export class FormApi<
       for (const validateObj of validates) {
         if (!validateObj.validate) continue
 
-        const error = normalizeError(
-          this.runValidator({
-            validate: validateObj.validate,
-            value: {
-              value: this.state.values,
-              formApi: this,
-            },
-            type: 'validate',
-          }),
-        )
+        // const error = normalizeError(
+        //   this.runValidator({
+        //     validate: validateObj.validate,
+        //     value: {
+        //       value: this.state.values,
+        //       formApi: this,
+        //     },
+        //     type: 'validate',
+        //   }),
+        // )
+        const error = this.runValidator({
+          validate: validateObj.validate,
+          value: {
+            value: this.state.values,
+            formApi: this,
+          },
+          type: 'validate',
+        })
         const errorMapKey = getErrorMapKey(validateObj.cause)
         if (this.state.errorMap[errorMapKey] !== error) {
           this.store.setState((prev) => ({
@@ -408,7 +439,15 @@ export class FormApi<
             },
           }))
         }
-        if (error) {
+        // if (error) {
+        //   hasErrored = true
+        // }
+        if (
+          Object.values(error).some(
+            (fieldErrors) =>
+              fieldErrors !== undefined && fieldErrors.length > 0,
+          )
+        ) {
           hasErrored = true
         }
       }
@@ -438,7 +477,7 @@ export class FormApi<
 
   validateAsync = async (
     cause: ValidationCause,
-  ): Promise<ValidationError[]> => {
+  ): Promise<FormValidationErrors<TFormData>> => {
     const validates = getAsyncValidatorArray(cause, this.options)
 
     if (!this.state.isFormValidating) {
@@ -449,7 +488,8 @@ export class FormApi<
      * We have to use a for loop and generate our promises this way, otherwise it won't be sync
      * when there are no validators needed to be run
      */
-    const promises: Promise<ValidationError | undefined>[] = []
+    // const promises: Promise<ValidationError | undefined>[] = []
+    const promises: Promise<FormValidationErrors<TFormData>>[] = []
 
     for (const validateObj of validates) {
       if (!validateObj.validate) continue
@@ -464,12 +504,15 @@ export class FormApi<
       }
 
       promises.push(
-        new Promise<ValidationError | undefined>(async (resolve) => {
-          let rawError!: ValidationError | undefined
+        // new Promise<ValidationError | undefined>(async (resolve) => {
+        new Promise<FormValidationErrors<TFormData>>(async (resolve) => {
+          // let rawError!: ValidationError | undefined
+          let rawError!: FormValidationErrors<TFormData>
           try {
             rawError = await new Promise((rawResolve, rawReject) => {
               setTimeout(async () => {
-                if (controller.signal.aborted) return rawResolve(undefined)
+                // if (controller.signal.aborted) return rawResolve(undefined)
+                if (controller.signal.aborted) return rawResolve({})
                 try {
                   rawResolve(
                     await this.runValidator({
@@ -488,9 +531,11 @@ export class FormApi<
               }, validateObj.debounceMs)
             })
           } catch (e: unknown) {
-            rawError = e as ValidationError
+            // rawError = e as ValidationError
+            rawError = e as FormValidationErrors<TFormData>
           }
-          const error = normalizeError(rawError)
+          // const error = normalizeError(rawError)
+          const error = rawError
           this.store.setState((prev) => ({
             ...prev,
             errorMap: {
@@ -504,22 +549,36 @@ export class FormApi<
       )
     }
 
-    let results: ValidationError[] = []
-    if (promises.length) {
-      results = await Promise.all(promises)
-    }
+    // let results: ValidationError[] = []
+    // if (promises.length) {
+    //   results = await Promise.all(promises)
+    // }
+    const results: FormValidationErrors<TFormData> = {}
+    promises.forEach(async (promise) => {
+      const formErrors = await promise
+      let key: keyof typeof formErrors
+      for (key in formErrors) {
+        const fieldErrors = results[key]
+        if (fieldErrors !== undefined) {
+          formErrors[key]?.forEach((fieldError) => fieldErrors.push(fieldError))
+        }
+      }
+    })
 
     this.store.setState((prev) => ({
       ...prev,
       isFormValidating: false,
     }))
 
-    return results.filter(Boolean)
+    // return results.filter(Boolean)
+    return results
   }
 
   validate = (
     cause: ValidationCause,
-  ): ValidationError[] | Promise<ValidationError[]> => {
+  ):
+    | FormValidationErrors<TFormData>
+    | Promise<FormValidationErrors<TFormData>> => {
     // Attempt to sync validate first
     const { hasErrored } = this.validateSync(cause)
 
